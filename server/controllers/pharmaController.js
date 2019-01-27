@@ -10,13 +10,22 @@ getTagMessage=function(info){
 module.exports = {
     getSyrupDetailsAndUpdateStatus: (Info,  cb) => {
         
+        Syrupsdb.findOne(info.data.serialNo)
+        .then(syrup=>{
+            if(!syrup.status){
+                Syrupsdb.findOneAndUpdate({serialNo:Info.data.serialNo,openedOnDate:undefined},
+                {status:"used",openedOnDate:Info.CurrentTime},{upsert:true},cb);
+            }
+            Syrupsdb.findOneAndUpdate({serialNo:Info.data.serialNo,openedOnDate:undefined},
+            {openedOnDate:Info.CurrentTime},{upsert:true},cb);
+        })
+
         let tagMessage=getTagMessage(Info.data);
         Users.findOneAndUpdate({userName:Info.user.name, userEmail:Info.user.email},
         {$push:{medicineBought:{$each:[Info.data]}}},{upsert:true},function(err,data){
             console.log(data);
         })
-        // Syrupsdb.findOneAndUpdate({serialNo:Info.data.serialNo,openedOnDate:undefined},
-        // {status:"used",openedOnDate:Info.CurrentTime},{upsert:true},cb);
+      
         
         
     },
